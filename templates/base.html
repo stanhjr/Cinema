@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../static/style.css"/>
+    <title>Base</title>
+</head>
+<body>
+
+<div class="main">
+        <div class="container">
+
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+ <div id="content_time"></div>
+<script src="../static/jquery-3.6.0.min.js"></script>
+    <script>
+        function show()
+        {
+            console.log('4')
+            $.ajax({
+                url: "{% url 'real-time' %}",
+                cache: false,
+                success: function(html){
+                    $("#content_time").html(html);
+                }
+            });
+        }
+        $(document).ready(function(){
+            show();
+            setInterval('show()',3000);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+[{"model": "cinema.myuser",
+  "pk": 1,
+  "fields": {"password": "pbkdf2_sha256$260000$ectcUNF1lLq7WxDVFqjUXO$zoXEn/8Vl+oigsLYWQpyniOunkpMl8pdCntbmkESK8k=", "last_login": "2022-01-22T14:03:56.957Z", "is_superuser": true, "username": "stan", "first_name": "", "last_name": "", "email": "stan@mail.ru", "is_staff": true, "is_active": true, "date_joined": "2022-01-22T14:03:30.466Z", "money_spent": 250, "groups": [], "user_permissions": []}},
+  {"model": "cinema.cinemahall", "pk": 1,
+    "fields": {"hall_name": "StanHall", "number_of_seats": 100}},
+
+  {"model": "cinema.cinemahall", "pk": 2,
+    "fields": {"hall_name": "AliceHall", "number_of_seats": 200}},
+
+  {"model": "cinema.movieshow", "pk": 1,
+    "fields": {"movie_name": "Batman", "ticket_price": 50, "start_time": "08:00:00", "finish_time": "10:00:00", "start_date": "2022-01-22", "finish_date": "2022-01-30", "cinema_hall": 1}},
+
+  {"model": "cinema.movieshow", "pk": 2,
+    "fields": {"movie_name": "Superman", "ticket_price": 100, "start_time": "11:00:00", "finish_time": "13:00:00", "start_date": "2022-01-23", "finish_date": "2022-01-30", "cinema_hall": 1}},
+
+  {"model": "cinema.purchasedticket", "pk": 1, "fields": {"date": "2022-01-22", "number_of_ticket": 5, "movie_show": 1, "user": 1}}]

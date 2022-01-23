@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load cinema_tags %}
+{% block content %}
+
+<div class="header">
+   <div class="header-left">
+       {% if user.is_authenticated %}
+        <div>{{ request.user }} <strong> {{ request.user.money_spent }}</strong></div>
+           <a href="{% url 'purchased' %}">Purchased list</a>
+   </div>
+   <div class="header-right">
+      <ul class="menu">
+           <li class="menu-item">
+           </li>
+           <li class="menu-item">
+                <a href="{% url 'logout' %}">Logout</a>
+            </li>
+
+            {% else %}
+                 <li class="menu-item">
+                    <a href="{% url 'login' %}">Login</a>
+                 </li>
+            {% endif %}
+      </ul>
+   </div>
+</div>
+    <form method="get" action="{% url 'index' %}">
+        <input type="hidden" name="show_date" value="Today">
+        <input type="submit" value="Today">
+    </form>
+
+    <form method="get" action="{% url 'index' %}">
+        <input type="hidden" name="show_date" value="Tomorrow">
+        <input type="submit" value="Tomorrow">
+    </form>
+
+    <form method="get" action="{% url 'index' %}">
+         {{ sort_form }}
+        <input type="submit" value="Ок">
+    </form>
+
+    {% if user.is_superuser %}
+        <a href="{% url 'create-hall' %}">Create Cinema Hall</a>
+        <a href="{% url 'create-movie' %}">Create Movie</a>
+        <a href="{% url 'hall-list' %}">List Cinema Hall</a>
+    {% endif %}
+
+
+<h2>Movie Shows:</h2>
+<div class="products">
+    {% for obj in object_list %}
+    <div class="product-item">
+        <div class="product-fields">
+            <div class="product-field">
+                <span class="product-field-name">Название зала:</span>
+                <span class="product-field-description">{{ obj.cinema_hall }}</span>
+            </div>
+            <div class="product-field">
+                <span class="product-field-name">Название фильма:</span>
+                <span class="product-field-description">{{ obj.movie_name }}</span>
+            </div>
+            <div class="product-field">
+                <span class="product-field-name">Время начала показа:</span>
+                <span class="product-field-description">{{ obj.start_time|time:"H:i" }}</span>
+            </div>
+            <div class="product-field">
+                <span class="product-field-name">Цена:</span>
+                <span class="product-field-description">{{ obj.ticket_price }} грн</span>
+            </div>
+            <div class="product-field">
+                <span class="product-field-name">Количество свободных мест:</span>
+                <span class="product-field-description">{% call_method_get_tickets_count obj 'get_tickets_count' date %}</span>
+            </div>
+
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'ticket-buy' %}">
+                {% csrf_token %}
+                <label>Count:</label>
+                <div class="count-input">
+                    {{ ticket_buy_form.number_of_ticket }}
+                </div>
+                <input type="hidden" name="movie-id" value={{ obj.pk }}>
+                <input type="hidden" name="date-buy" value="{{ date }}">
+                <input type="hidden" name="tickets_left" value="{% call_method_get_tickets_count obj 'get_tickets_count' date %}">
+                <input type="submit" value="Buy">
+            </form>
+            {% if messages %}
+                <ul class="messages">
+                {% for message in messages %}
+                    <span class="system-massage">{{ message }}</span>
+                 {% endfor %}
+                     </ul>
+                 {% endif %}
+            {% endif %}
+        </div>
+
+
+    {% if user.is_superuser %}
+        <form method="get" action="{% url 'update-movie' obj.pk %}">
+            {% csrf_token %}
+            <input type="submit" value="Update Movie Show">
+        </form>
+        {% endif %}
+    </div>
+
+
+    {% endfor %}
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+</div>
+{% endblock %}

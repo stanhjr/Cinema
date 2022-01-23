@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load cinema_tags %}
+{% block content %}
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <span class="system-massage">{{ message }}</span>
+     {% endfor %}
+         </ul>
+     {% endif %}
+
+    <a href="{% url 'index' %}">HOME</a>
+
+<div class="header">
+   <div class="header-left">
+       {% if user.is_authenticated %}
+        <div>{{ request.user }} <strong> {{ request.user.money_spent }}</strong></div>
+   </div>
+   <div class="header-right">
+      <ul class="menu">
+           <li class="menu-item">
+           </li>
+           <li class="menu-item">
+                <a href="{% url 'logout' %}">Logout</a>
+            </li>
+
+            {% else %}
+                 <li class="menu-item">
+                    <a href="{% url 'login' %}">Login</a>
+                 </li>
+            {% endif %}
+      </ul>
+   </div>
+</div>
+
+
+
+<h2>User Purchased:</h2>
+<div class="products">
+    {% for obj in object_list %}
+    <div class="product-item">
+        <div class="product-fields">
+            <div class="product-field">
+                <span class="product-field-name">Название зала:</span>
+                <span class="product-field-description">{{ obj.movie_show.cinema_hall }}</span>
+            </div>
+            <div class="product-field">
+                <span class="product-field-name">Название фильма:</span>
+                <span class="product-field-description">{{ obj.movie_show.movie_name }}</span>
+            </div>
+            <div class="product-field">
+                <span class="product-field-name">Время начала показа:</span>
+                <span class="product-field-description">{{ obj.movie_show.start_time|time:"H:i" }}</span>
+            </div>
+            <div class="product-field">
+                <span class="product-field-name">Дата показа:</span>
+                <span class="product-field-description">{{ obj.date|date:'Y-m-d'}}</span>
+            </div>
+            <div class="product-field">
+                <span class="product-field-name">Стоимость билета:</span>
+                <span class="product-field-description">{{ obj.movie_show.ticket_price }} грн</span>
+            </div>
+            <div class="product-field">
+                <span class="product-field-name">Количество купленых билетов:</span>
+                <span class="product-field-description">{{ obj.number_of_ticket }}</span>
+            </div>
+            <div class="product-field">
+                <span class="product-field-name">Сумма покупки:</span>
+                <span class="product-field-description">{{ obj.get_purchase_amount}}</span>
+            </div>
+
+        </div>
+    </div>
+    {% endfor %}
+            <div class="product-field">
+                <span class="product-field-name">Общая сумма всех покупок:</span>
+                <span class="product-field-description">{{ all_purchases }}</span>
+            </div>
+
+
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+</div>
+{% endblock %}

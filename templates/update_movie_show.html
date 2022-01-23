@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+ 
+{% block content %}
+    <h1>Update Movie Show</h1>
+        <form method="post">{% csrf_token %}
+              {{ form.as_p }}
+            <input type="submit" value="Update" />
+        </form>
+
+    {% if messages %}
+        <ul class="messages">
+        {% for message in messages %}
+            <span class="system-massage">{{ message }}</span>
+         {% endfor %}
+             </ul>
+     {% endif %}
+{% endblock content %}
