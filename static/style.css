@@ -172,6 +172,8 @@ select {
 }
 .pagination {
     margin-bottom: 20px;
+    display: flex;
+    gap: 20px;
 }
 .total-order{
     margin-bottom: 30px;
@@ -181,4 +183,12 @@ select {
 }
 select#id_cinema_hall {
     width: 140px;
+}
+.pagination-buttons {
+    display: flex;
+    gap: 20px;
+}
+span.current {
+    display: block;
+    margin-bottom: 20px;
 }
