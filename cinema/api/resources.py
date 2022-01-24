@@ -34,14 +34,20 @@ class PurchaseListView(APIView):
 
 class GetToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data,
+                                           context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, created = TokenExpired.objects.get_or_create(user=user)
-        # if (timezone.now() - token.last_action).seconds > SESSION_COOKIE_AGE:
-        #     token.delete()
-        #     token, created = TokenExpired.objects.get_or_create(user=user)
-        #
+        token.last_action = timezone.now()
+
+        if user.is_superuser:
+            return Response({'token': token.key})
+
+        if (timezone.now() - token.last_action).seconds < SESSION_COOKIE_AGE:
+            token.last_action = timezone.now()
+        else:
+            token.delete()
         return Response({'token': token.key})
 
 
