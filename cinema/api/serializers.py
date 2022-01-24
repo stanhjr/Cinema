@@ -64,7 +64,7 @@ class MovieShowSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class MovieShowSerializerPOST(serializers.ModelSerializer):
+class MovieShowSerializerPost(serializers.ModelSerializer):
 
     class Meta:
         model = MovieShow
@@ -117,7 +117,6 @@ class MovieShowSerializerPOST(serializers.ModelSerializer):
             if movie_obj:
                 raise serializers.ValidationError(
                     {'start_date, finish_date': 'Сеансы в одном зале не могут накладываться друг на друга'})
-
         return data
 
 
@@ -135,16 +134,19 @@ class PurchaseSerializerCreate(serializers.ModelSerializer):
         """
         Create and return a new `PurchasedTicket` instance, given the validated data.
         """
-
         return PurchasedTicket.objects.create(**validated_data)
 
     def validate(self, data):
         movie = data['movie_show']
+        date_purchase = data['date']
         number_of_ticket = data['number_of_ticket']
         data['user'] = MyUser.objects.get(id=self.user_id)
-
+        if number_of_ticket == 0:
+            raise serializers.ValidationError({'number_of_ticket': 'Вы не выбрали нужного количества билетов'})
         if movie.get_tickets_count(data['date']) - int(number_of_ticket) < 0:
             raise serializers.ValidationError({'number_of_ticket': 'Такого количества свободных мест нет'})
+        if date_purchase < date.today():
+            raise serializers.ValidationError({'date': 'Вчера уже прошло, надо смотрет в будущее'})
         return data
 
 
@@ -156,12 +158,6 @@ class PurchaseSerializer(serializers.ModelSerializer):
         model = PurchasedTicket
         fields = ['date', 'movie_show', 'number_of_ticket']
 
-    def create(self, validated_data):
-        """
-        Create and return a new `PurchasedTicket` instance, given the validated data.
-        """
-
-        return PurchasedTicket.objects.create(**validated_data)
 
 
 

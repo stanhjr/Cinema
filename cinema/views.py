@@ -78,7 +78,7 @@ class CinemaHallListView(PermissionRequiredMixin, ListView):
     permission_required = 'is_superuser'
     model = CinemaHall
     template_name = 'cinema_list.html'
-    paginate_by = 5
+    paginate_by = 6
 
     def handle_no_permission(self):
         return redirect('login/')
@@ -126,7 +126,7 @@ class MovieShowUpdateView(PermissionRequiredMixin, UpdateView):
 class PurchasedListView(LoginRequiredMixin, ListView):
     model = PurchasedTicket
     template_name = 'purchased.html'
-    paginate_by = 5
+    paginate_by = 6
 
     def get_context_data(self, **kwargs):
         context = super(PurchasedListView, self).get_context_data(**kwargs)
@@ -147,16 +147,23 @@ class PurchasedListView(LoginRequiredMixin, ListView):
 class MovieListView(ListView):
     model = MovieShow
     template_name = 'index.html'
-    paginate_by = 5
+    paginate_by = 6
     extra_context = {'ticket_buy_form': ProductBuyForm}
 
     def get_context_data(self, **kwargs):
         context = super(MovieListView, self).get_context_data(**kwargs)
         context['sort_form'] = ChoiceForm
+
+        if self.request.GET.get('filter_by'):
+            context['filter'] = self.request.GET.get('filter_by')
+
         if self.request.GET.get('show_date') == 'Tomorrow':
             context['date'] = str(datetime.date.today() + datetime.timedelta(days=1))
+            context['day'] = 'Tomorrow'
+
         elif self.request.GET.get('show_date') == 'Today':
             context['date'] = str(datetime.date.today())
+            context['day'] = 'Today'
         else:
             context['date'] = str(datetime.date.today())
         return context

@@ -1,11 +1,8 @@
-import unittest
 from datetime import time, date
 from unittest.mock import patch
 from django.contrib.auth.models import AnonymousUser
-from django.contrib.messages.middleware import MessageMiddleware
 from django.test import TestCase, RequestFactory
 from freezegun import freeze_time
-
 from cinema.forms import CinemaHallCreateForm
 from cinema.models import MyUser, CinemaHall, MovieShow
 from cinema.views import CinemaHallListView, CinemaHallCreateView, MovieShowCreateView, CinemaHallUpdateView, \
@@ -178,7 +175,6 @@ class MovieShowUpdateViewTest(TestCase):
         self.assertEqual(response.url, 'login/')
 
     @freeze_time('2022-01-22')
-    # @patch('cinema.forms.messages.warning', return_value=None)
     def test_update_movie_superuser_valid(self):
         cinema_hall_obj = CinemaHall.objects.get(id=1)
         request = self.factory.post('update_movie_show/',

@@ -19,7 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from cinema.api.resources import MovieShowViewSet, LogoutAPI, RegisterAPI, GetToken, \
-    CinemaHallList, CinemaHallUpdate, PurchaseList, MovieShowPOST, MovieShowUpdate
+    CinemaHallList, CinemaHallUpdate, PurchaseList, MovieShowPost, MovieShowUpdate
 from cinema.views import Login, Register, Logout, MovieListView, ProductBuyView, PurchasedListView, \
     CinemaHallCreateView, CinemaHallUpdateView, MovieShowUpdateView, MovieShowCreateView, CinemaHallListView, \
     real_time_movie

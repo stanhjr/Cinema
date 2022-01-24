@@ -1,20 +1,12 @@
 import json
-import unittest
-from datetime import time, date
 from django.contrib.auth.models import AnonymousUser
-from django.contrib.messages.middleware import MessageMiddleware
-from django.test import TestCase
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIRequestFactory, force_authenticate, APITestCase
-
-from rest_framework.test import APIClient
 from freezegun import freeze_time
-
-from cinema.api.resources import PurchaseList, CinemaHallUpdate, MovieShowPOST, MovieShowUpdate, MovieShowViewSet, \
-    GetToken
-from cinema.api.serializers import PurchaseSerializer, MovieShowSerializerPOST
-from cinema.models import MyUser, CinemaHall, MovieShow, PurchasedTicket
+from cinema.api.resources import PurchaseList, CinemaHallUpdate, MovieShowPost, MovieShowUpdate, MovieShowViewSet, \
+    GetToken, RegisterAPI
+from cinema.api.serializers import PurchaseSerializer
+from cinema.models import MyUser, PurchasedTicket
 
 
 @freeze_time('2022-01-23')
@@ -70,13 +62,9 @@ class MovieShowViewSetTestCase(APITestCase):
         force_authenticate(request, user=AnonymousUser())
         response = MovieShowViewSet.as_view({'get': 'list'})(request)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        with open('/home/stan/stan/Cinema/cinema/tests/data/test_movie_list_answer.json') as json_file:
+        with open(r'D:\0_cinema\Cinema\cinema\tests\data\test_movie_list_answer.json') as json_file:
             data = json.load(json_file)
         response.render()
-        # with open('/home/stan/stan/Cinema/cinema/tests/data/test_movie_list_answer2.json', 'w') as json_file:
-        #     text = json.loads(response.content)
-        #     text_2 = json.dumps(text)
-        #     json_file.write(text_2)
         self.assertEqual(json.loads(response.content), data)
 
 
@@ -161,7 +149,7 @@ class MovieShowUpdateTestCase(APITestCase):
 
 
 @freeze_time('2022-01-22')
-class MovieShowPOSTTestCase(APITestCase):
+class MovieShowPostTestCase(APITestCase):
     fixtures = ['initial_data.json', ]
 
     def setUp(self):
@@ -180,7 +168,7 @@ class MovieShowPOSTTestCase(APITestCase):
 
         request = self.factory.post('/api/session_create/', data)
         force_authenticate(request, user=self.superuser)
-        response = MovieShowPOST.as_view()(request)
+        response = MovieShowPost.as_view()(request)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_create_movie_superuser_invalid(self):
@@ -194,7 +182,7 @@ class MovieShowPOSTTestCase(APITestCase):
 
         request = self.factory.post('/api/session_create/', data)
         force_authenticate(request, user=self.superuser)
-        response = MovieShowPOST.as_view()(request)
+        response = MovieShowPost.as_view()(request)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_movie_user(self):
@@ -208,7 +196,7 @@ class MovieShowPOSTTestCase(APITestCase):
 
         request = self.factory.post('/api/session_create/', data)
         force_authenticate(request, user=self.user)
-        response = MovieShowPOST.as_view()(request)
+        response = MovieShowPost.as_view()(request)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_create_movie_anonimouseuser(self):
@@ -222,7 +210,7 @@ class MovieShowPOSTTestCase(APITestCase):
 
         request = self.factory.post('/api/session_create/', data)
         force_authenticate(request, user=AnonymousUser())
-        response = MovieShowPOST.as_view()(request)
+        response = MovieShowPost.as_view()(request)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
@@ -314,5 +302,31 @@ class GetTokenTestCase(APITestCase):
         response = GetToken.as_view()(request)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_time_live_token(self):
-        ...
+
+class RegisterApiTestCase(APITestCase):
+    fixtures = ['initial_data.json', ]
+
+    def setUp(self):
+        self.factory = APIRequestFactory()
+
+    def test_register_valid(self):
+        data = {'username': 'alice', 'password': 'Power1Power2Power3'}
+        request = self.factory.post('api/registration/', data=data)
+        response = RegisterAPI.as_view()(request)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_register_invalid(self):
+        data = {'username': 'stan', 'password': '1'}
+        request = self.factory.post('api/registration/', data=data)
+        response = RegisterAPI.as_view()(request)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
+
+
+

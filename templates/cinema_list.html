@@ -1,59 +1,44 @@
 {% extends 'base.html' %}
 {% block content %}
 
-{% if user.is_superuser %}
+    {% if user.is_superuser %}
     {% endif %}
-<div class="header">
-   <div class="header-right">
-      <ul class="menu">
-           <li class="menu-item">
-           </li>
-           <li class="menu-item">
-                <a href="{% url 'logout' %}">Logout</a>
-            </li>
+    
 
-                 <li class="menu-item">
-                    <a href="{% url 'login' %}">Login</a>
-                 </li>
+    <a href="{% url 'index' %}">HOME</a>
+    <h2>Cinema Hall List:</h2>
+    <div class="products">
+        {% for obj in object_list %}
+            <div class="product-item">
+                <div class="product-fields">
+                    <div class="product-field">
+                        <span class="product-field-name">Название зала:</span>
+                        <span class="product-field-description">{{ obj.hall_name }}</span>
+                    </div>
+                    <div class="product-field">
+                        <span class="product-field-name">Количество мест:</span>
+                        <span class="product-field-description">{{ obj.number_of_seats }}</span>
+                    </div>
 
-      </ul>
-   </div>
-</div>
 
-<a href="{% url 'index' %}">HOME</a>
-<h2>Cinema Hall List:</h2>
-<div class="products">
-    {% for obj in object_list %}
-    <div class="product-item">
-        <div class="product-fields">
-            <div class="product-field">
-                <span class="product-field-name">Название зала:</span>
-                <span class="product-field-description">{{ obj.hall_name }}</span>
+                    {% if messages %}
+                        <ul class="messages">
+                            {% for message in messages %}
+                                <span class="system-massage">{{ message }}</span>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <form method="get" action="{% url 'update-hall' obj.pk %}">
+                    {% csrf_token %}
+                    <input type="submit" value="Update Cinema Hall">
+                </form>
             </div>
-            <div class="product-field">
-                <span class="product-field-name">Количество мест:</span>
-                <span class="product-field-description">{{ obj.number_of_seats }}</span>
-            </div>
 
 
-            {% if messages %}
-                <ul class="messages">
-                {% for message in messages %}
-                    <span class="system-massage">{{ message }}</span>
-                 {% endfor %}
-                     </ul>
-                 {% endif %}
-        </div>
-
-        <form method="get" action="{% url 'update-hall' obj.pk %}">
-            {% csrf_token %}
-            <input type="submit" value="Update Cinema Hall">
-        </form>
-    </div>
-
-
-    {% endfor %}
-    <div class="pagination">
+        {% endfor %}
+        <div class="pagination">
         <span class="step-links">
             {% if page_obj.has_previous %}
                 <a href="?page=1">&laquo; first</a>
@@ -69,7 +54,7 @@
                 <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
             {% endif %}
         </span>
+        </div>
     </div>
-</div>
 
 {% endblock %}

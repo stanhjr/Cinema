@@ -12,24 +12,9 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.response import Response
 from cinema.api.serializers import RegisterSerializer, CinemaHallSerializer, PurchaseSerializer, MovieShowSerializer, \
-    PurchaseSerializerCreate, MovieShowSerializerPOST
+    PurchaseSerializerCreate, MovieShowSerializerPost
 from cinema.models import MyUser, TokenExpired, CinemaHall, MovieShow, PurchasedTicket
 from stanhjr_project.settings import SESSION_COOKIE_AGE
-
-
-class PurchaseListView(APIView):
-
-    def get(self, request):
-        purchasets = PurchasedTicket.objects.filter(user=request.user)
-        serializer = PurchaseSerializer(purchasets, many=True)
-        return Response(serializer.data)
-
-    def post(self, request):
-        serializer = PurchaseSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GetToken(ObtainAuthToken):
@@ -40,14 +25,8 @@ class GetToken(ObtainAuthToken):
         user = serializer.validated_data['user']
         token, created = TokenExpired.objects.get_or_create(user=user)
         token.last_action = timezone.now()
+        token.save()
 
-        if user.is_superuser:
-            return Response({'token': token.key})
-
-        if (timezone.now() - token.last_action).seconds < SESSION_COOKIE_AGE:
-            token.last_action = timezone.now()
-        else:
-            token.delete()
         return Response({'token': token.key})
 
 
@@ -127,11 +106,11 @@ class PurchaseList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class MovieShowPOST(APIView):
+class MovieShowPost(APIView):
     permission_classes = [IsAdminUser]
 
     def post(self, request):
-        serializer = MovieShowSerializerPOST(data=request.data)
+        serializer = MovieShowSerializerPost(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -143,7 +122,7 @@ class MovieShowUpdate(APIView):
 
     def put(self, request, pk):
         movie_show = MovieShow.objects.get(id=pk)
-        serializer = MovieShowSerializerPOST(movie_show, data=request.data)
+        serializer = MovieShowSerializerPost(movie_show, data=request.data)
 
         if serializer.is_valid():
             serializer.save()

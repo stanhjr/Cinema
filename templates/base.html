@@ -14,26 +14,5 @@
             {% endblock %}
         </div>
     </div>
-
- <div id="content_time"></div>
-<script src="../static/jquery-3.6.0.min.js"></script>
-    <script>
-        function show()
-        {
-            console.log('4')
-            $.ajax({
-                url: "{% url 'real-time' %}",
-                cache: false,
-                success: function(html){
-                    $("#content_time").html(html);
-                }
-            });
-        }
-        $(document).ready(function(){
-            show();
-            setInterval('show()',10000);
-        });
-    </script>
-
 </body>
 </html>

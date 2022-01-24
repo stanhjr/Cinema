@@ -1,19 +1,19 @@
-import unittest
-from datetime import date, time
+from datetime import date, time, datetime
 from django.test import TestCase
 from cinema.models import CinemaHall, MovieShow, PurchasedTicket, MyUser, TokenExpired
 from freezegun import freeze_time
 
 
-@unittest.skip
 class TokenExpiredTest(TestCase):
+    fixtures = ['initial_data.json', ]
 
     def setUp(self):
-        TokenExpired.objects.create(last_action='2022-01-22', token_ptr_id='98fe0336e35153393f3bfee2910ce2342d41b435')
+        self.user = MyUser.objects.get(username='stan')
+        TokenExpired.objects.create(last_action='2022-01-22 22:00', user=self.user)
 
     def test_create_token(self):
-        my_token = TokenExpired.objects.get(last_action='2022-01-22')
-        self.assertEqual(my_token.token_ptr_id, '98fe0336e35153393f3bfee2910ce2342d41b435')
+        my_token = TokenExpired.objects.get(user=self.user)
+        self.assertEqual(my_token.last_action, datetime.fromisoformat('2022-01-22 20:00:00+00:00'))
 
 
 class MyUserTest(TestCase):
@@ -41,12 +41,16 @@ class CinemaHallTestCase(TestCase):
 
     @freeze_time('2022-01-22')
     def test_cinema_hall_methods(self):
-
         stan_hall = CinemaHall.objects.get(id=1)
         alice_hall = CinemaHall.objects.get(id=2)
         purchase_obj = PurchasedTicket.objects.get(id=1)
         self.assertEqual(stan_hall.get_tickets(), purchase_obj)
         self.assertEqual(alice_hall.get_tickets(), None)
+
+    def test_str_cinema_hall(self):
+        stan_hall = CinemaHall.objects.get(id=1)
+        hall_name = str(stan_hall)
+        self.assertEqual(stan_hall.hall_name, hall_name)
 
 
 class MovieShowTestCase(TestCase):
@@ -111,15 +115,3 @@ class PurchasedTicketTestCase(TestCase):
     def test_method_purchase_ticket(self):
         purchase_obj = PurchasedTicket.objects.get(id=1)
         self.assertEqual(purchase_obj.get_purchase_amount(), 250)
-
-
-
-
-
-
-
-
-
-
-
-

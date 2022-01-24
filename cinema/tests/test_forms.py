@@ -1,14 +1,7 @@
-import unittest
-<<<<<<< HEAD
-=======
-
->>>>>>> 1f4175f00a8406e9e1af63f6168b7047e0ed4f76
-from django.core.exceptions import ValidationError
 from unittest.mock import patch
 from django.test import RequestFactory
 from freezegun import freeze_time
 from django.test import TestCase
-
 from cinema.forms import CinemaHallCreateForm, MovieShowCreateForm, MovieShowUpdateForm, ProductBuyForm, SignUpForm
 from cinema.models import MovieShow
 
@@ -25,9 +18,6 @@ class CinemaHallCreateFormTest(TestCase):
         form_data = {'hall_name': 'NewHall', 'number_of_seats': 5}
         form = CinemaHallCreateForm(data=form_data)
         self.assertTrue(form.is_valid())
-
-    def test_update_hall(self):
-        ...
 
 
 class MovieShowCreateFormTest(TestCase):
@@ -114,18 +104,11 @@ class MovieShowUpdateFormTest(TestCase):
     fixtures = ['initial_data.json', ]
 
     def setUp(self):
-<<<<<<< HEAD
         self.factory = RequestFactory()
 
     @patch('cinema.forms.messages.warning', return_value=None)
     def test_confused_time_movie_show_create(self, warning):
-=======
-        # Every test needs access to the request factory.
         self.factory = RequestFactory()
-
-    @unittest.skip
-    def test_confused_time_movie_show_create(self):
->>>>>>> 1f4175f00a8406e9e1af63f6168b7047e0ed4f76
         form_data = {'movie_name': 'TestMovie',
                      'ticket_price': 77,
                      'start_time': '11:00',
@@ -168,14 +151,6 @@ class MovieShowUpdateFormTest(TestCase):
         form.is_valid()
         self.assertEqual(form.errors, {'__all__': ['Фильм всё так должен идти какое то количество времени)))']})
 
-<<<<<<< HEAD
-        request = self.factory.post('update_movie_show/1/')
-        form = MovieShowUpdateForm(data=form_data, request=request)
-        form.is_valid()
-        self.assertEqual(form.errors, {'__all__': ['Фильм всё так должен идти какое то количество времени)))']})
-=======
->>>>>>> 1f4175f00a8406e9e1af63f6168b7047e0ed4f76
-
     @freeze_time('2022-01-22')
     def test_create_movie_show_valid(self):
         form_data = {'movie_name': 'TestMovie',
@@ -209,6 +184,13 @@ class ProductBuyFormTest(TestCase):
         request = self.factory.post('ticket-buy/', {'tickets_left': 10})
         form = ProductBuyForm(data={"number_of_ticket": 4, "tickets_left": 1}, request=request)
         self.assertTrue(form.is_valid())
+
+    @patch('cinema.forms.messages.warning', return_value=None)
+    def test_there_are_no_count_tickets(self, warning):
+        request = self.factory.post('ticket-buy/', {'tickets_left': 10})
+        form = ProductBuyForm(data={"number_of_ticket": 0, "tickets_left": 1}, request=request)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors, {'__all__': ['Вы не выбрали нужного количества билетов']})
 
 
 class SignUpFormTest(TestCase):

@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
- 
+
 {% block content %}
     <a href="{% url 'index' %}">HOME</a>
     <h1>Create Cinema Hall</h1>
-    <form method="post">{% csrf_token %}
-      {{ form.as_p }}
-    <input type="submit" value="Create" />
-</form>
+    <form class="create-form" method="post">{% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Create"/>
+    </form>
 {% endblock content %}

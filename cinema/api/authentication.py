@@ -13,11 +13,18 @@ class TokenExpiredAuth(TokenAuthentication):
         auth = super().authenticate(request=request)
         if auth:
             user, token = auth
-            # if (timezone.now() - token.last_action).seconds > SESSION_COOKIE_AGE:
-            #     msg = 'Session time to dead!'
-            #     raise exceptions.AuthenticationFailed(msg)
-            # token.last_action = timezone.now()
+            if user.is_superuser and (timezone.now() - token.last_action).seconds > SESSION_COOKIE_AGE_ADMIN:
+                msg = 'Admin session time to dead!'
+                raise exceptions.AuthenticationFailed(msg)
+
+            elif user.is_superuser:
+                token.last_action = timezone.now()
+                token.save()
+                return user, token
+
+            if (timezone.now() - token.last_action).seconds > SESSION_COOKIE_AGE:
+                msg = 'User session time to dead!'
+                raise exceptions.AuthenticationFailed(msg)
+            token.last_action = timezone.now()
             token.save()
             return user, token
-
-

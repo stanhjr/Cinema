@@ -1,13 +1,11 @@
 import unittest
 from datetime import date, time
+from django.test import RequestFactory
 from rest_framework.test import APIRequestFactory, force_authenticate, APITestCase
 from cinema.api.serializers import CinemaHallSerializer, RegisterSerializer, MovieShowSerializer, PurchaseSerializer, \
-    PurchaseSerializerCreate
+    PurchaseSerializerCreate, MovieShowSerializerPost
 from cinema.models import CinemaHall, MovieShow, PurchasedTicket, MyUser, TokenExpired
 from freezegun import freeze_time
-
-
-# api/registration/
 
 
 class RegisterSerializerTestCase(APITestCase):
@@ -42,6 +40,86 @@ class PurchaseSerializerCreateTestCase(APITestCase):
         self.assertEqual(data, expected_data)
 
 
+@freeze_time('2022-01-22')
+class MovieShowSerializerPostTestCase(APITestCase):
+    fixtures = ['initial_data.json', ]
+
+    def test_create_movie_show_valid(self):
+        data = {'movie_name': 'TestMovie',
+                      'ticket_price': 77,
+                      'start_time': '19:00',
+                      'finish_time': '20:00',
+                      'start_date': '2022-01-23',
+                      'finish_date': '2022-01-30',
+                      'cinema_hall': 2}
+
+        serializer = MovieShowSerializerPost(data=data)
+        self.assertTrue(serializer.is_valid())
+
+    def test_create_movie_show_invalid_cross_sessions(self):
+        data = {'movie_name': 'TestMovie',
+                      'ticket_price': 188,
+                      'start_time': '08:00',
+                      'finish_time': '10:00',
+                      'start_date': '2022-01-23',
+                      'finish_date': '2022-01-30',
+                      'cinema_hall': 1}
+
+        serializer = MovieShowSerializerPost(data=data)
+        self.assertFalse(serializer.is_valid())
+
+    def test_create_movie_show_invalid_time(self):
+        data = {'movie_name': 'TestMovie',
+                      'ticket_price': 188,
+                      'start_time': '11:00',
+                      'finish_time': '10:00',
+                      'start_date': '2022-01-22',
+                      'finish_date': '2022-01-22',
+                      'cinema_hall': 2}
+
+        serializer = MovieShowSerializerPost(data=data)
+        self.assertFalse(serializer.is_valid())
+
+    def test_create_movie_show_invalid_date(self):
+        data = {'movie_name': 'TestMovie',
+                      'ticket_price': 188,
+                      'start_time': '11:00',
+                      'finish_time': '10:00',
+                      'start_date': '2022-01-25',
+                      'finish_date': '2022-01-24',
+                      'cinema_hall': 2}
+
+        serializer = MovieShowSerializerPost(data=data)
+        self.assertFalse(serializer.is_valid())
+
+
+@freeze_time('2022-01-22')
+class PurchaseSerializerCreateTest(APITestCase):
+    fixtures = ['initial_data.json', ]
+
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.superuser = MyUser.objects.get(id=1)
+
+    def test_create_purchase_valid_data(self):
+        data = {'date': '2022-01-25', 'movie_show': 1, 'number_of_ticket': 10, 'user_id': 1}
+        serializer = PurchaseSerializerCreate(data=data, user_id=1)
+        self.assertTrue(serializer.is_valid())
+
+    def test_create_purchase_invalid_max_tickets(self):
+        data = {'date': '2022-01-25', 'movie_show': 1, 'number_of_ticket': 500, 'user_id': 1}
+        serializer = PurchaseSerializerCreate(data=data, user_id=1)
+        self.assertFalse(serializer.is_valid())
+
+    def test_create_purchase_invalid_date(self):
+        data = {'date': '2022-01-20', 'movie_show': 1, 'number_of_ticket': 5}
+        serializer = PurchaseSerializerCreate(data=data, user_id=1)
+        self.assertFalse(serializer.is_valid())
+
+    def test_create_purchase_invalid_no_count_ticket(self):
+        data = {'date': '2022-01-20', 'movie_show': 1, 'number_of_ticket': 0}
+        serializer = PurchaseSerializerCreate(data=data, user_id=1)
+        self.assertFalse(serializer.is_valid())
 
 
 
@@ -53,49 +131,7 @@ class PurchaseSerializerCreateTestCase(APITestCase):
 
 
 
-# @freeze_time('2022-01-22')
-# class MovieShowSerializerPOSTTestCase(TestCase):
-#     fixtures = ['initial_data.json', ]
-#
-#     def test_create_movie_show_valid(self):
-#         cinema_hall_obj = CinemaHall.objects.get(id=2)
-#         movie_data = {'movie_name': 'TestMovie',
-#                       'ticket_price': 77,
-#                       'start_time': '19:00',
-#                       'finish_time': '20:00',
-#                       'start_date': '2022-01-22',
-#                       'finish_date': '2022-01-30',
-#                       'cinema_hall': cinema_hall_obj}
-#
-#         new_movie = MovieShow.objects.create(**movie_data)
-#
-#         serializer_data = MovieShowSerializer(new_movie).data
-#         expected_data = {'movie_name': 'TestMovie',
-#                          'ticket_price': 77,
-#                          'start_time': '19:00',
-#                          'finish_time': '20:00',
-#                          'start_date': '2022-01-22',
-#                          'finish_date': '2022-01-30',
-#                          'cinema_hall': 2,
-#                          'id': new_movie.id}
-#         self.assertEqual(serializer_data.get('id'), new_movie.id)
-#         self.assertEqual(serializer_data.get('cinema_hall').data, expected_data)
-#
-#     def test_create_movie_show_invalid(self):
-#         cinema_hall_obj = CinemaHall.objects.get(id=1)
-#         movie_data = {'movie_name': 'TestMovie',
-#                       'ticket_price': 77,
-#                       'start_time': '9:00',
-#                       'finish_time': '10:00',
-#                       'start_date': '2022-01-22',
-#                       'finish_date': '2022-01-30',
-#                       'cinema_hall': cinema_hall_obj}
-#
-#         new_movie = MovieShow.objects.create(**movie_data)
-#
-#         serializer_data = MovieShowSerializer(new_movie).data
-#         expected_data = {'start_date, finish_date': 'Сеансы в одном зале не могут накладываться друг на друга'}
-#         self.assertEqual(serializer_data, expected_data)
-#
+
+
 
 
