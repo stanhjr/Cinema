@@ -141,7 +141,7 @@ class PurchaseSerializerCreate(serializers.ModelSerializer):
         date_purchase = data['date']
         number_of_ticket = data['number_of_ticket']
         data['user'] = MyUser.objects.get(id=self.user_id)
-        if number_of_ticket == 0:
+        if number_of_ticket <= 0:
             raise serializers.ValidationError({'number_of_ticket': 'Вы не выбрали нужного количества билетов'})
         if movie.get_tickets_count(data['date']) - int(number_of_ticket) < 0:
             raise serializers.ValidationError({'number_of_ticket': 'Такого количества свободных мест нет'})

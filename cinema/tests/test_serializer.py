@@ -121,6 +121,11 @@ class PurchaseSerializerCreateTest(APITestCase):
         serializer = PurchaseSerializerCreate(data=data, user_id=1)
         self.assertFalse(serializer.is_valid())
 
+    def test_create_purchase_invalid_minus_count_ticket(self):
+        data = {'date': '2022-01-20', 'movie_show': 1, 'number_of_ticket': -1}
+        serializer = PurchaseSerializerCreate(data=data, user_id=1)
+        self.assertFalse(serializer.is_valid())
+
 
 
 
