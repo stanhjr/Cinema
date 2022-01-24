@@ -77,7 +77,6 @@ class MovieShowSerializerPOST(serializers.ModelSerializer):
         return instance
 
     def validate(self, data):
-
         start_time = data.get('start_time')
         finish_time = data.get('finish_time')
         start_date = data.get('start_date')

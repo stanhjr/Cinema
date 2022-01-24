@@ -97,7 +97,6 @@
 
     {% if user.is_superuser %}
         <form method="get" action="{% url 'update-movie' obj.pk %}">
-            {% csrf_token %}
             <input type="submit" value="Update Movie Show">
         </form>
         {% endif %}

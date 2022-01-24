@@ -1,0 +1,1 @@
+[{"id": 1, "cinema_hall": {"id": 1, "hall_name": "StanHall", "number_of_seats": 100}, "movie_name": "Batman", "ticket_price": 50, "start_time": "08:00:00", "finish_time": "10:00:00", "start_date": "2022-01-22", "finish_date": "2022-01-30"}]

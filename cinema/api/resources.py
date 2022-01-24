@@ -1,9 +1,7 @@
 import datetime
 from datetime import timedelta, date
-
 from django.db import transaction
 from django.db.models import Q
-from pytz import unicode
 from rest_framework import permissions, status, serializers
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.utils import timezone
@@ -43,7 +41,7 @@ class GetToken(ObtainAuthToken):
         # if (timezone.now() - token.last_action).seconds > SESSION_COOKIE_AGE:
         #     token.delete()
         #     token, created = TokenExpired.objects.get_or_create(user=user)
-
+        #
         return Response({'token': token.key})
 
 
@@ -111,7 +109,6 @@ class PurchaseList(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-
         serializer = PurchaseSerializerCreate(data=request.data, user_id=request.user.id)
         if serializer.is_valid():
             user = MyUser.objects.get(id=request.user.id)
@@ -144,7 +141,7 @@ class MovieShowUpdate(APIView):
 
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -163,29 +160,26 @@ class MovieShowViewSet(ModelViewSet):
         finish_time = self.request.query_params.get('finish_time') or '23:59:59'
         hall_id = self.request.query_params.get('hall_id')
         show_day = self.request.query_params.get('show_day')
-        enter_start_time = Q(start_time__range=(start_time, finish_time))
+        enter_time_range = Q(start_time__range=(start_time, finish_time))
 
         if start_time >= finish_time:
             raise serializers.ValidationError(
                 {'Error query params': 'Время начала не может быть больше или равно времени окончания поиска'})
 
         if show_day == 'today':
-            return super().get_queryset().filter(start_date__lte=date.today(), finish_date__gt=date.today())
+            return super().get_queryset().filter(start_date__lte=date.today(),
+                                                 finish_date__gt=date.today())
 
         elif show_day == 'tomorrow':
             return super().get_queryset().filter(start_date__lte=date.today() + datetime.timedelta(days=1),
                                                  finish_date__gt=date.today())
 
         if hall_id:
-            return super().get_queryset().filter(enter_start_time, start_date__lte=date.today(),
+            return super().get_queryset().filter(enter_time_range, start_date__lte=date.today(),
                                                  finish_date__gte=date.today(),
                                                  cinema_hall=hall_id)
 
-        return super().get_queryset().filter(enter_start_time, start_date__lte=date.today(),
+        return super().get_queryset().filter(enter_time_range, start_date__lte=date.today(),
                                              finish_date__gte=date.today())
 
-
-
-
         # return super().get_queryset().filter(start_date__lte=date.today(), finish_date__gt=date.today())
-

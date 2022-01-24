@@ -48,6 +48,7 @@ urlpatterns = [
     path('login/', Login.as_view(), name='login'),
     path('register/', Register.as_view(), name='register'),
     path('logout/', Logout.as_view(), name='logout'),
+    path('realtime/', real_time_movie, name='real-time'),
 ]
 
 urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
@@ -58,18 +59,11 @@ urlpatterns += [
     path('api/logout/', LogoutAPI.as_view(), name='api_logout'),
     path('api/update_hall/<int:pk>/', CinemaHallUpdate.as_view(), name='cinema_hall_update'),
     path('api/create_hall/', CinemaHallList.as_view(), name='cinema_hall_list'),
-    path('api/session/<str:show_day>/', MovieShowViewSet.as_view({'get': 'list',
-                                                                'post': 'create'}), name='show_day'),
-    path('api/session/', MovieShowViewSet.as_view({'get': 'list',
-                                                                'post': 'create'}), name='show_day'),
-
-    path('api/session/<int:pk>/', MovieShowViewSet.as_view({'get': 'list',
-                                                          'put': 'update'}), name='show_day'),
-
+    path('api/session/<str:show_day>/', MovieShowViewSet.as_view({'get': 'list'}), name='show_day'),
+    path('api/session/', MovieShowViewSet.as_view({'get': 'list'}), name='show_movie_today'),
+    path('api/session/<int:pk>/', MovieShowViewSet.as_view({'get': 'list'}), name='show_movie_in_cinema_hall'),
     path('api/session_create/', MovieShowPOST.as_view(), name='api-movie_show_create'),
     path('api/session_update/<int:pk>/', MovieShowUpdate.as_view(), name='api-movie_show_update'),
     path('api/purchased/', PurchaseList.as_view(), name='api-purchased'),
-    path('realtime/', real_time_movie, name='real-time'),
-
 ]
 

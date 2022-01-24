@@ -20,7 +20,7 @@ class CinemaHallCreateView(PermissionRequiredMixin, UserPassesTestMixin, CreateV
     permission_required = 'is_superuser'
     model = CinemaHall
     form_class = CinemaHallCreateForm
-    success_url = '/hall-list'
+    success_url = '/hall-list/'
     template_name = 'create_cinema_hall.html'
 
     def test_func(self):
@@ -57,7 +57,7 @@ class CinemaHallUpdateView(PermissionRequiredMixin, UpdateView):
     model = CinemaHall
     form_class = CinemaHallCreateForm
     template_name = 'update_cinema_hall.html'
-    success_url = '/hall-list'
+    success_url = '/hall-list/'
 
     def test_func(self):
         return self.request.user.is_superuser
@@ -117,6 +117,11 @@ class MovieShowUpdateView(PermissionRequiredMixin, UpdateView):
         obj.save()
         return super().form_valid(form=form)
 
+    def get_form_kwargs(self):
+        kw = super(MovieShowUpdateView, self).get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
 
 class PurchasedListView(LoginRequiredMixin, ListView):
     model = PurchasedTicket
@@ -126,7 +131,6 @@ class PurchasedListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(PurchasedListView, self).get_context_data(**kwargs)
         if self.request.user.is_authenticated:
-
             context['all_purchases'] = self.request.user.money_spent
             return context
         return context

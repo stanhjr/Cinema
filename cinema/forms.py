@@ -140,5 +140,5 @@ class ProductBuyForm(ModelForm):
         count_of_buy = int(cleaned_data.get('number_of_ticket'))
         tickets_left = int(self.request.POST.get('tickets_left'))
         if count_of_buy > tickets_left:
-            messages.warning(self.request, 'Такого количесва свободных мест нет')
-            raise ValidationError('Такого количесва свободных мест нет')
+            messages.warning(self.request, 'Такого количества свободных мест нет')
+            raise ValidationError('Такого количества свободных мест нет')
