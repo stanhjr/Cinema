@@ -1,9 +1,14 @@
 import unittest
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1f4175f00a8406e9e1af63f6168b7047e0ed4f76
 from django.core.exceptions import ValidationError
 from unittest.mock import patch
 from django.test import RequestFactory
 from freezegun import freeze_time
 from django.test import TestCase
+
 from cinema.forms import CinemaHallCreateForm, MovieShowCreateForm, MovieShowUpdateForm, ProductBuyForm, SignUpForm
 from cinema.models import MovieShow
 
@@ -109,10 +114,18 @@ class MovieShowUpdateFormTest(TestCase):
     fixtures = ['initial_data.json', ]
 
     def setUp(self):
+<<<<<<< HEAD
         self.factory = RequestFactory()
 
     @patch('cinema.forms.messages.warning', return_value=None)
     def test_confused_time_movie_show_create(self, warning):
+=======
+        # Every test needs access to the request factory.
+        self.factory = RequestFactory()
+
+    @unittest.skip
+    def test_confused_time_movie_show_create(self):
+>>>>>>> 1f4175f00a8406e9e1af63f6168b7047e0ed4f76
         form_data = {'movie_name': 'TestMovie',
                      'ticket_price': 77,
                      'start_time': '11:00',
@@ -150,11 +163,18 @@ class MovieShowUpdateFormTest(TestCase):
                      'start_date': '2022-01-30',
                      'finish_date': '2022-01-30',
                      'cinema_hall': 2}
-
         request = self.factory.post('update_movie_show/1/')
         form = MovieShowUpdateForm(data=form_data, request=request)
         form.is_valid()
         self.assertEqual(form.errors, {'__all__': ['Фильм всё так должен идти какое то количество времени)))']})
+
+<<<<<<< HEAD
+        request = self.factory.post('update_movie_show/1/')
+        form = MovieShowUpdateForm(data=form_data, request=request)
+        form.is_valid()
+        self.assertEqual(form.errors, {'__all__': ['Фильм всё так должен идти какое то количество времени)))']})
+=======
+>>>>>>> 1f4175f00a8406e9e1af63f6168b7047e0ed4f76
 
     @freeze_time('2022-01-22')
     def test_create_movie_show_valid(self):
