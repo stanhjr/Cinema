@@ -1,6 +1,11 @@
 import unittest
+
+from django.core.exceptions import ValidationError
+from unittest.mock import patch
+from django.test import RequestFactory
 from freezegun import freeze_time
 from django.test import TestCase
+
 from cinema.forms import CinemaHallCreateForm, MovieShowCreateForm, MovieShowUpdateForm, ProductBuyForm, SignUpForm
 
 
@@ -93,6 +98,10 @@ class MovieShowCreateFormTest(TestCase):
 class MovieShowUpdateFormTest(TestCase):
     fixtures = ['initial_data.json', ]
 
+    def setUp(self):
+        # Every test needs access to the request factory.
+        self.factory = RequestFactory()
+
     @unittest.skip
     def test_confused_time_movie_show_create(self):
         form_data = {'movie_name': 'TestMovie',
@@ -118,8 +127,8 @@ class MovieShowUpdateFormTest(TestCase):
         form = MovieShowUpdateForm(data=form_data)
         self.assertRaises(TypeError)
 
-    @unittest.skip
-    def test_equal_date_movie_show_create(self):
+    @patch('cinema.forms.messages.warning', return_value=None)
+    def test_equal_date_movie_show_create(self, warning):
         form_data = {'movie_name': 'TestMovie',
                      'ticket_price': 77,
                      'start_time': '11:00',
@@ -127,9 +136,11 @@ class MovieShowUpdateFormTest(TestCase):
                      'start_date': '2022-01-30',
                      'finish_date': '2022-01-30',
                      'cinema_hall': 2}
+        request = self.factory.post('update_movie_show/1/')
+        form = MovieShowUpdateForm(data=form_data, request=request)
+        form.is_valid()
+        self.assertEqual(form.errors, {'__all__': ['Фильм всё так должен идти какое то количество времени)))']})
 
-        form = MovieShowUpdateForm(data=form_data)
-        self.assertRaises(TypeError)
 
     @freeze_time('2022-01-22')
     def test_create_movie_show_valid(self):
@@ -172,32 +183,3 @@ class SignUpFormTest(TestCase):
         form_data = {'username': 'stan', 'password1': '1', 'password2': '1'}
         form = SignUpForm(data=form_data)
         self.assertFalse(form.is_valid())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
