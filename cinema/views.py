@@ -1,15 +1,13 @@
 import datetime
-from datetime import date
 from django.db import transaction
+from django.db.models import Q
 from django.contrib import messages, auth
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import redirect
-from django.db.models import Avg, Q
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView
-
 from stanhjr_project.settings import SESSION_COOKIE_AGE_ADMIN, SESSION_COOKIE_AGE
 from .forms import SignUpForm, ChoiceForm, ProductBuyForm, CinemaHallCreateForm, \
     MovieShowCreateForm, MovieShowUpdateForm

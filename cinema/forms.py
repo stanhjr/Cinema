@@ -1,3 +1,4 @@
+import datetime
 from datetime import date
 from django import forms
 from django.contrib import messages
@@ -17,7 +18,6 @@ class TimeInput(forms.TimeInput):
 
 
 class CinemaHallCreateForm(ModelForm):
-
     class Meta:
         model = CinemaHall
         fields = ["hall_name", "number_of_seats"]
@@ -137,11 +137,18 @@ class ProductBuyForm(ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        movie_show_id = self.request.POST.get('movie-id')
+        movie_show_obj = MovieShow.objects.get(id=movie_show_id)
         count_of_buy = int(cleaned_data.get('number_of_ticket'))
         tickets_left = int(self.request.POST.get('tickets_left'))
+
         if count_of_buy == 0:
             messages.warning(self.request, 'Вы не выбрали нужного количества билетов')
             raise ValidationError('Вы не выбрали нужного количества билетов')
+
+        if movie_show_obj.start_time < datetime.datetime.now().time() and self.request.POST.get('date-buy') == str(datetime.date.today()):
+            messages.warning(self.request, 'Онлайн продажи для этого сеанса на сегодня закрыты')
+            raise ValidationError('Этот сеанс сегодня уже завершился')
 
         if count_of_buy > tickets_left:
             messages.warning(self.request, 'Такого количества свободных мест нет')

@@ -1,9 +1,8 @@
+import datetime
 from datetime import date
 from django.contrib.auth.hashers import make_password
-from django.db import transaction
 from django.db.models import Q
 from rest_framework import serializers
-# from cinema.forms import q_time
 from cinema.models import MyUser, CinemaHall, PurchasedTicket, MovieShow, TokenExpired
 
 
@@ -145,6 +144,8 @@ class PurchaseSerializerCreate(serializers.ModelSerializer):
             raise serializers.ValidationError({'number_of_ticket': 'Вы не выбрали нужного количества билетов'})
         if movie.get_tickets_count(data['date']) - int(number_of_ticket) < 0:
             raise serializers.ValidationError({'number_of_ticket': 'Такого количества свободных мест нет'})
+        if movie.start_time < datetime.datetime.now().time() and date_purchase == date.today():
+            raise serializers.ValidationError({'start_time': 'Онлайн продажи для этого сеанса закрыты'})
         if date_purchase < date.today():
             raise serializers.ValidationError({'date': 'Вчера уже прошло, надо смотрет в будущее'})
         return data

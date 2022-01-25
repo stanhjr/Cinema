@@ -1,9 +1,8 @@
+from stanhjr_project.settings import SESSION_COOKIE_AGE_ADMIN, SESSION_COOKIE_AGE
+from cinema.models import TokenExpired
 from django.utils import timezone
 from rest_framework import exceptions
 from rest_framework.authentication import TokenAuthentication
-
-from stanhjr_project.settings import SESSION_COOKIE_AGE_ADMIN, SESSION_COOKIE_AGE
-from cinema.models import TokenExpired
 
 
 class TokenExpiredAuth(TokenAuthentication):

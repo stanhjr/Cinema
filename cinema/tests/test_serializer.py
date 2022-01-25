@@ -1,10 +1,8 @@
-import unittest
-from datetime import date, time
 from django.test import RequestFactory
-from rest_framework.test import APIRequestFactory, force_authenticate, APITestCase
-from cinema.api.serializers import CinemaHallSerializer, RegisterSerializer, MovieShowSerializer, PurchaseSerializer, \
-    PurchaseSerializerCreate, MovieShowSerializerPost
-from cinema.models import CinemaHall, MovieShow, PurchasedTicket, MyUser, TokenExpired
+from rest_framework.test import APITestCase
+from cinema.api.serializers import CinemaHallSerializer, RegisterSerializer, PurchaseSerializerCreate,\
+    MovieShowSerializerPost
+from cinema.models import CinemaHall, MovieShow, MyUser
 from freezegun import freeze_time
 
 
@@ -125,6 +123,19 @@ class PurchaseSerializerCreateTest(APITestCase):
         data = {'date': '2022-01-20', 'movie_show': 1, 'number_of_ticket': -1}
         serializer = PurchaseSerializerCreate(data=data, user_id=1)
         self.assertFalse(serializer.is_valid())
+
+    @freeze_time('2022-01-22 08:30')
+    def test_create_purchase_invalid_date_time_now(self):
+        data = {'date': '2022-01-20', 'movie_show': 1, 'number_of_ticket': 2}
+        serializer = PurchaseSerializerCreate(data=data, user_id=1)
+        self.assertFalse(serializer.is_valid())
+
+        @freeze_time('2022-01-22 07:30')
+        def test_create_purchase_valid_date_time_now(self):
+            data = {'date': '2022-01-20', 'movie_show': 1, 'number_of_ticket': 2}
+            serializer = PurchaseSerializerCreate(data=data, user_id=1)
+            self.assertTrue(serializer.is_valid())
+
 
 
 

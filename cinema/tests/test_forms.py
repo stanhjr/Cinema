@@ -174,20 +174,27 @@ class ProductBuyFormTest(TestCase):
     @patch('cinema.forms.messages.warning', return_value=None)
     def test_ticket_not_enough(self, warning):
         movie_obj = MovieShow.objects.get(id=1)
-        request = self.factory.post('ticket-buy/', {'tickets_left': 1})
+        request = self.factory.post('ticket-buy/', {'tickets_left': 1, 'movie-id': 1})
         form = ProductBuyForm(data={"number_of_ticket": 4, "tickets_left": 1}, request=request)
         form.is_valid()
         self.assertEqual(form.errors, {'__all__': ['Такого количества свободных мест нет']})
 
     @patch('cinema.forms.messages.warning', return_value=None)
     def test_there_are_tickets(self, warning):
-        request = self.factory.post('ticket-buy/', {'tickets_left': 10})
+        request = self.factory.post('ticket-buy/', {'tickets_left': 10, 'movie-id': 1})
         form = ProductBuyForm(data={"number_of_ticket": 4, "tickets_left": 1}, request=request)
         self.assertTrue(form.is_valid())
 
     @patch('cinema.forms.messages.warning', return_value=None)
     def test_there_are_no_count_tickets(self, warning):
-        request = self.factory.post('ticket-buy/', {'tickets_left': 10})
+        request = self.factory.post('ticket-buy/', {'tickets_left': 10, 'movie-id': 1})
+        form = ProductBuyForm(data={"number_of_ticket": 0, "tickets_left": 1}, request=request)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors, {'__all__': ['Вы не выбрали нужного количества билетов']})
+
+    @patch('cinema.forms.messages.warning', return_value=None)
+    def test_date_time_invalid(self, warning):
+        request = self.factory.post('ticket-buy/', {'tickets_left': 10, 'movie-id': 1})
         form = ProductBuyForm(data={"number_of_ticket": 0, "tickets_left": 1}, request=request)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, {'__all__': ['Вы не выбрали нужного количества билетов']})

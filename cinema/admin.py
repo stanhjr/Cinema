@@ -11,5 +11,4 @@ def login_hook(sender, **kwargs):
 admin.site.register(CinemaHall)
 admin.site.register(PurchasedTicket)
 admin.site.register(MovieShow)
-
 user_logged_in.connect(login_hook)

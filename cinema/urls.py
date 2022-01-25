@@ -27,6 +27,8 @@ urlpatterns = [
     path('logout/', Logout.as_view(), name='logout'),
     path('realtime/', real_time_movie, name='real-time'),
 ]
+
+
 urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
 urlpatterns += router.urls
 urlpatterns += [

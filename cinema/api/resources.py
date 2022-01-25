@@ -1,12 +1,11 @@
 import datetime
-from datetime import timedelta, date
+from datetime import date
 from django.db import transaction
 from django.db.models import Q
 from rest_framework import permissions, status, serializers
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.utils import timezone
-from rest_framework.generics import CreateAPIView, DestroyAPIView, GenericAPIView
-from rest_framework.mixins import CreateModelMixin
+from rest_framework.generics import CreateAPIView, DestroyAPIView
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
@@ -14,7 +13,6 @@ from rest_framework.response import Response
 from cinema.api.serializers import RegisterSerializer, CinemaHallSerializer, PurchaseSerializer, MovieShowSerializer, \
     PurchaseSerializerCreate, MovieShowSerializerPost
 from cinema.models import MyUser, TokenExpired, CinemaHall, MovieShow, PurchasedTicket
-from stanhjr_project.settings import SESSION_COOKIE_AGE
 
 
 class GetToken(ObtainAuthToken):
@@ -26,7 +24,6 @@ class GetToken(ObtainAuthToken):
         token, created = TokenExpired.objects.get_or_create(user=user)
         token.last_action = timezone.now()
         token.save()
-
         return Response({'token': token.key})
 
 
@@ -167,4 +164,3 @@ class MovieShowViewSet(ModelViewSet):
         return super().get_queryset().filter(enter_time_range, start_date__lte=date.today(),
                                              finish_date__gte=date.today())
 
-        # return super().get_queryset().filter(start_date__lte=date.today(), finish_date__gt=date.today())
