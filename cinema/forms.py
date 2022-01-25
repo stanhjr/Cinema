@@ -1,12 +1,17 @@
 import datetime
 from datetime import date
 from django import forms
+from django.forms.widgets import TextInput
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 from django.db.models import Q
 from cinema.models import MyUser, PurchasedTicket, MovieShow, CinemaHall
+
+
+class NumberInput(TextInput):
+    input_type = 'number'
 
 
 class DateInput(forms.DateInput):
@@ -129,11 +134,11 @@ class ProductBuyForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(ProductBuyForm, self).__init__(*args, **kwargs)
-        self.fields["number_of_ticket"].initial = 0
 
     class Meta:
         model = PurchasedTicket
         fields = ["number_of_ticket", ]
+        widgets = {"number_of_ticket": NumberInput(attrs={'min': '1', 'step': '1'})}
 
     def clean(self):
         cleaned_data = super().clean()

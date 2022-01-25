@@ -1,6 +1,6 @@
 import datetime
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, F
 from django.contrib import messages, auth
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import LoginView, LogoutView
@@ -108,7 +108,6 @@ class MovieShowUpdateView(PermissionRequiredMixin, UpdateView):
 
         if MovieShow.objects.filter(cinema_hall=obj.cinema_hall).exclude(id=obj.id).filter(
                 enter_start_date | enter_finish_date).filter(enter_start_time | enter_finish_time):
-
             messages.warning(self.request, 'Сеансы в одном зале не могут накладываться друг на друга')
             return super().form_invalid(form=form)
 
@@ -181,9 +180,11 @@ class MovieListView(ListView):
             return super().get_queryset().filter(start_date__lte=datetime.date.today() + datetime.timedelta(days=1),
                                                  finish_date__gt=datetime.date.today())
         elif self.request.GET.get('show_date') == 'Today':
-            return super().get_queryset().filter(start_date__lte=datetime.date.today(), finish_date__gt=datetime.date.today())
+            return super().get_queryset().filter(start_date__lte=datetime.date.today(),
+                                                 finish_date__gt=datetime.date.today())
         else:
-            return super().get_queryset().filter(start_date__lte=datetime.date.today(), finish_date__gt=datetime.date.today())
+            return super().get_queryset().filter(start_date__lte=datetime.date.today(),
+                                                 finish_date__gt=datetime.date.today())
 
 
 class ProductBuyView(LoginRequiredMixin, CreateView):
@@ -247,5 +248,18 @@ class Logout(LoginRequiredMixin, LogoutView):
 
 def real_time_movie(request):
     current_time = datetime.datetime.now().time()
-    count = MovieShow.objects.filter(start_time__lte=current_time, finish_time__gte=current_time).count()
+    print(current_time)
+    count_day = MovieShow.objects.filter(start_time__lte=current_time, finish_time__gte=current_time).count()
+
+    count_night_movie_until_midnight = MovieShow.objects.filter(start_time__gt=F('finish_time'),
+                                                                start_time__lte=current_time).count()
+
+    count_night_movie_after_midnight = MovieShow.objects.filter(start_time__gt=F('finish_time'),
+                                                                finish_time__gte=current_time).count()
+
+    count = count_day + count_night_movie_after_midnight + count_night_movie_until_midnight
+    print(count_day)
+    print(count_night_movie_until_midnight)
+    print(count_night_movie_after_midnight)
+
     return HttpResponse(f"Количество активных сеансов {count}")
