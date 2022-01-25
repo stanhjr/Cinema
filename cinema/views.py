@@ -237,6 +237,7 @@ class Register(CreateView):
     form_class = SignUpForm
     template_name = 'register.html'
     login_url = reverse_lazy('login')
+    success_url = reverse_lazy('login')
 
 
 class Logout(LoginRequiredMixin, LogoutView):

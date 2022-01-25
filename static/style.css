@@ -192,3 +192,21 @@ span.current {
     display: block;
     margin-bottom: 20px;
 }
+.error-toast{
+    position: fixed;
+    right: 0;
+    bottom: 0;
+}
+.error-toast-inner{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 16px;
+    padding: 40px 55px;
+    background-color: #fff;
+    border-radius: 15px;
+}
+.error-toast svg {
+    width: 25px;
+    height: 25px;
+}

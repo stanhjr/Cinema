@@ -92,13 +92,7 @@
                                    value="{% call_method_get_tickets_count obj 'get_tickets_count' date %}">
                             <input type="submit" value="Buy">
                         </form>
-                        {% if messages %}
-                            <ul class="messages">
-                                {% for message in messages %}
-                                    <span class="system-massage">{{ message }}</span>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
+
                     {% endif %}
                 </div>
 
@@ -117,29 +111,29 @@
             {% if page_obj.has_previous %}
 
                 <form method="get" action="?page={{ page_obj.previous_page_number }}">
-                <input type="hidden" name="show_date" value="{{ day }}">
-                <input type="hidden" name="filter_by" value="{{ filter }}">
-                <input type="hidden" name="page" value="{{ page_obj.previous_page_number }}">
-                <input type="submit" value="previous">
-            </form>
+                    <input type="hidden" name="show_date" value="{{ day }}">
+                    <input type="hidden" name="filter_by" value="{{ filter }}">
+                    <input type="hidden" name="page" value="{{ page_obj.previous_page_number }}">
+                    <input type="submit" value="previous">
+                </form>
 
             {% endif %}
 
             {% if page_obj.has_next %}
 
                 <form method="get" action="?page={{ page_obj.paginator.num_pages }}">
-                <input type="hidden" name="show_date" value="{{ day }}">
-                <input type="hidden" name="filter_by" value="{{ filter }}">
-                <input type="hidden" name="page" value="{{ page_obj.paginator.num_pages }}">
-                <input type="submit" value="last">
-            </form>
+                    <input type="hidden" name="show_date" value="{{ day }}">
+                    <input type="hidden" name="filter_by" value="{{ filter }}">
+                    <input type="hidden" name="page" value="{{ page_obj.paginator.num_pages }}">
+                    <input type="submit" value="last">
+                </form>
 
                 <form method="get" action="?page={{ page_obj.next_page_number }}">
-                <input type="hidden" name="show_date" value="{{ day }}">
-                <input type="hidden" name="filter_by" value="{{ filter }}">
-                <input type="hidden" name="page" value="{{ page_obj.next_page_number }}">
-                <input type="submit" value="next">
-            </form>
+                    <input type="hidden" name="show_date" value="{{ day }}">
+                    <input type="hidden" name="filter_by" value="{{ filter }}">
+                    <input type="hidden" name="page" value="{{ page_obj.next_page_number }}">
+                    <input type="submit" value="next">
+                </form>
 
             {% endif %}
 
@@ -149,6 +143,18 @@
                 Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
             </span>
     <div id="content_time"></div>
+    <div class="error-toast">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <div class="error-toast-inner">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="svg-icon" viewBox="0 0 1024 1024" version="1.1"><path d="M512 0C229.376 0 0 229.376 0 512s229.376 512 512 512 512-229.376 512-512S794.624 0 512 0z m218.624 672.256c15.872 15.872 15.872 41.984 0 57.856-8.192 8.192-18.432 11.776-29.184 11.776s-20.992-4.096-29.184-11.776L512 569.856l-160.256 160.256c-8.192 8.192-18.432 11.776-29.184 11.776s-20.992-4.096-29.184-11.776c-15.872-15.872-15.872-41.984 0-57.856L454.144 512 293.376 351.744c-15.872-15.872-15.872-41.984 0-57.856 15.872-15.872 41.984-15.872 57.856 0L512 454.144l160.256-160.256c15.872-15.872 41.984-15.872 57.856 0 15.872 15.872 15.872 41.984 0 57.856L569.856 512l160.768 160.256z" fill="#CF3736"/></svg>
+                    <span class="system-massage">{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
     <script src="../static/jquery-3.6.0.min.js"></script>
     <script>
         function show() {
@@ -166,6 +172,11 @@
             show();
             setInterval('show()', 80000);
         });
+
+
+        setTimeout(function() {
+            $(".error-toast").hide();
+        }, 3000);
     </script>
 
 {% endblock %}
