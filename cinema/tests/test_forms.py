@@ -20,6 +20,7 @@ class CinemaHallCreateFormTest(TestCase):
         self.assertTrue(form.is_valid())
 
 
+@freeze_time('2022-01-22 07:30')
 class MovieShowCreateFormTest(TestCase):
     fixtures = ['initial_data.json', ]
 
@@ -39,15 +40,15 @@ class MovieShowCreateFormTest(TestCase):
         request = self.factory.post('create-movie/')
         form = MovieShowCreateForm(data=form_data, request=request)
         form.is_valid()
-        self.assertEqual(form.errors, {'__all__': ['Нельзя создавать сеанcы "от вчера"!']})
+        self.assertEqual(form.errors, {'__all__': ['Сеансы в одном зале не могут накладываться друг на друга']})
 
     @patch('cinema.forms.messages.warning', return_value=None)
-    def test_confused_time_movie_show_create(self, warning):
+    def test_invalid_time_movie_show_create(self, warning):
         form_data = {'movie_name': 'TestMovie',
                      'ticket_price': 77,
                      'start_time': '11:00',
                      'finish_time': '08:00',
-                     'start_date': '2022-01-22',
+                     'start_date': '2022-01-21',
                      'finish_date': '2022-01-30',
                      'cinema_hall': 2}
 
@@ -57,12 +58,12 @@ class MovieShowCreateFormTest(TestCase):
         self.assertEqual(form.errors, {'__all__':  ['Нельзя создавать сеанcы "от вчера"!']})
 
     @patch('cinema.forms.messages.warning', return_value=None)
-    def test_confused_date_movie_show_create(self, warning):
+    def test_invalid_date_movie_show_create(self, warning):
         form_data = {'movie_name': 'TestMovie',
                      'ticket_price': 77,
-                     'start_time': '08:00',
+                     'start_time': '05:00',
                      'finish_time': '11:00',
-                     'start_date': '2022-01-21',
+                     'start_date': '2022-01-22',
                      'finish_date': '2022-01-30',
                      'cinema_hall': 2}
 
@@ -83,6 +84,7 @@ class MovieShowCreateFormTest(TestCase):
 
         request = self.factory.post('create-movie/')
         form = MovieShowCreateForm(data=form_data, request=request)
+        self.assertFalse(form.is_valid())
         form.is_valid()
         self.assertEqual(form.errors, {'__all__': ['Фильм всё так должен идти какое то количество времени)))']})
 
@@ -99,7 +101,36 @@ class MovieShowCreateFormTest(TestCase):
         form = MovieShowCreateForm(data=form_data)
         self.assertTrue(form.is_valid())
 
+    @patch('cinema.forms.messages.warning', return_value=None)
+    def test_invalid_midnight_movie_show_create(self, warning):
+        form_data = {'movie_name': 'TestMovie',
+                     'ticket_price': 77,
+                     'start_time': '23:00',
+                     'finish_time': '21:00',
+                     'start_date': '2022-01-21',
+                     'finish_date': '2022-01-30',
+                     'cinema_hall': 1}
 
+        request = self.factory.post('create-movie/')
+        form = MovieShowCreateForm(data=form_data, request=request)
+        self.assertFalse(form.is_valid())
+
+    @patch('cinema.forms.messages.warning', return_value=None)
+    def test_invalid_midnight_movie_show_create_2(self, warning):
+        form_data = {'movie_name': 'TestMovie',
+                     'ticket_price': 77,
+                     'start_time': '23:00',
+                     'finish_time': '21:00',
+                     'start_date': '2022-01-22',
+                     'finish_date': '2022-01-30',
+                     'cinema_hall': 1}
+
+        request = self.factory.post('create-movie/')
+        form = MovieShowCreateForm(data=form_data, request=request)
+        self.assertFalse(form.is_valid())
+
+
+@freeze_time('2022-01-22 07:30')
 class MovieShowUpdateFormTest(TestCase):
     fixtures = ['initial_data.json', ]
 
@@ -107,13 +138,13 @@ class MovieShowUpdateFormTest(TestCase):
         self.factory = RequestFactory()
 
     @patch('cinema.forms.messages.warning', return_value=None)
-    def test_confused_time_movie_show_create(self, warning):
+    def test_invalid_time_movie_show_create(self, warning):
         self.factory = RequestFactory()
         form_data = {'movie_name': 'TestMovie',
                      'ticket_price': 77,
                      'start_time': '11:00',
                      'finish_time': '08:00',
-                     'start_date': '2022-01-22',
+                     'start_date': '2022-01-21',
                      'finish_date': '2022-01-30',
                      'cinema_hall': 2}
 
