@@ -248,9 +248,7 @@ class Logout(LoginRequiredMixin, LogoutView):
 
 def real_time_movie(request):
     current_time = datetime.datetime.now().time()
-    print(current_time)
     count_day = MovieShow.objects.filter(start_time__lte=current_time, finish_time__gte=current_time).count()
-
     count_night_movie_until_midnight = MovieShow.objects.filter(start_time__gt=F('finish_time'),
                                                                 start_time__lte=current_time).count()
 
@@ -258,8 +256,5 @@ def real_time_movie(request):
                                                                 finish_time__gte=current_time).count()
 
     count = count_day + count_night_movie_after_midnight + count_night_movie_until_midnight
-    print(count_day)
-    print(count_night_movie_until_midnight)
-    print(count_night_movie_after_midnight)
 
     return HttpResponse(f"Количество активных сеансов {count}")

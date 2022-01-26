@@ -92,6 +92,14 @@ class MovieShowSerializerPost(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {'start_date, finish_date': 'Нельзя создавать сеанcы от вчера!'})
 
+        if start_date < date.today() or finish_date < date.today():
+            raise serializers.ValidationError(
+                {'start_date, finish_date': 'Нельзя создавать сеанcы от вчера!'})
+
+        if start_date == date.today() and start_time < datetime.now().time():
+            raise serializers.ValidationError(
+                {'start_date, finish_date': 'Нельзя создавать сеанcы от вчера!'})
+
         cinema_hall_obj = CinemaHall.objects.get(id=data.get('cinema_hall').id)
         enter_start_date = Q(start_date__range=(start_date, finish_date))
         enter_finish_date = Q(finish_date__range=(start_date, finish_date))
@@ -100,6 +108,17 @@ class MovieShowSerializerPost(serializers.ModelSerializer):
 
         movie_obj = MovieShow.objects.filter(cinema_hall=cinema_hall_obj.pk).filter(
             enter_start_date | enter_finish_date).filter(enter_start_time | enter_finish_time)
+
+        if start_time > finish_time:
+            enter_start_time_until_midnight = Q(start_time__range=(start_time, '23:59:59'))
+            enter_start_time_after_midnight = Q(start_time__range=('00:00:00', finish_time))
+            enter_finish_time_until_midnight = Q(finish_time__range=(start_time, '23:59:59'))
+            enter_finish_time_after_midnight = Q(finish_time__range=('00:00:00', finish_time))
+
+            movie_obj = MovieShow.objects.filter(cinema_hall=cinema_hall_obj.pk).filter(
+                enter_start_date | enter_finish_date).\
+                filter(enter_start_time_until_midnight | enter_start_time_after_midnight |
+                       enter_finish_time_until_midnight | enter_finish_time_after_midnight).all()
 
         if self.instance:
             movie_show_obj = MovieShow.objects.get(id=self.instance.id)

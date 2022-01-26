@@ -1,5 +1,4 @@
-import datetime
-from datetime import date
+from datetime import date, time, datetime
 from django import forms
 from django.forms.widgets import TextInput
 from django.contrib import messages
@@ -59,17 +58,33 @@ class MovieShowCreateForm(ModelForm):
         if start_date == finish_date and start_time >= finish_time:
             messages.warning(self.request, 'Фильм всё так должен идти какое то количество времени)))')
             raise ValidationError('Фильм всё так должен идти какое то количество времени)))')
-        if start_date < date.today():
+        if start_date < date.today() or finish_date < date.today():
+            messages.warning(self.request, 'Нельзя создавать сеансы "от вчера"!')
+            raise ValidationError('Нельзя создавать сеанcы "от вчера"!')
+
+        if start_date == date.today() and start_time < datetime.now().time():
             messages.warning(self.request, 'Нельзя создавать сеансы "от вчера"!')
             raise ValidationError('Нельзя создавать сеанcы "от вчера"!')
 
         enter_start_date = Q(start_date__range=(start_date, finish_date))
         enter_finish_date = Q(finish_date__range=(start_date, finish_date))
+
         enter_start_time = Q(start_time__range=(start_time, finish_time))
         enter_finish_time = Q(finish_time__range=(start_time, finish_time))
 
         movie_obj = MovieShow.objects.filter(cinema_hall=cinema_hall_obj.pk).filter(
-            enter_start_date | enter_finish_date).filter(enter_start_time | enter_finish_time)
+            enter_start_date | enter_finish_date).filter(enter_start_time | enter_finish_time).all()
+
+        if start_time > finish_time:
+            enter_start_time_until_midnight = Q(start_time__range=(start_time, '23:59:59'))
+            enter_start_time_after_midnight = Q(start_time__range=('00:00:00', finish_time))
+            enter_finish_time_until_midnight = Q(finish_time__range=(start_time, '23:59:59'))
+            enter_finish_time_after_midnight = Q(finish_time__range=('00:00:00', finish_time))
+
+            movie_obj = MovieShow.objects.filter(cinema_hall=cinema_hall_obj.pk).filter(
+                enter_start_date | enter_finish_date).\
+                filter(enter_start_time_until_midnight | enter_start_time_after_midnight |
+                       enter_finish_time_until_midnight | enter_finish_time_after_midnight).all()
 
         if movie_obj:
             messages.warning(self.request, 'Сеансы в одном зале не могут накладываться друг на друга')
@@ -151,7 +166,7 @@ class ProductBuyForm(ModelForm):
             messages.warning(self.request, 'Вы не выбрали нужного количества билетов')
             raise ValidationError('Вы не выбрали нужного количества билетов')
 
-        if movie_show_obj.start_time < datetime.datetime.now().time() and self.request.POST.get('date-buy') == str(datetime.date.today()):
+        if movie_show_obj.start_time < datetime.now().time() and self.request.POST.get('date-buy') == str(date.today()):
             messages.warning(self.request, 'Онлайн продажи для этого сеанса на сегодня закрыты')
             raise ValidationError('Этот сеанс сегодня уже завершился')
 
