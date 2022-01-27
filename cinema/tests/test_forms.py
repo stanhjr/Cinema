@@ -116,13 +116,27 @@ class MovieShowCreateFormTest(TestCase):
         self.assertFalse(form.is_valid())
 
     @patch('cinema.forms.messages.warning', return_value=None)
-    def test_invalid_midnight_movie_show_create_2(self, warning):
+    def test_invalid_midnight_movie_show_create_v2(self, warning):
         form_data = {'movie_name': 'TestMovie',
                      'ticket_price': 77,
                      'start_time': '23:00',
                      'finish_time': '21:00',
                      'start_date': '2022-01-22',
                      'finish_date': '2022-01-30',
+                     'cinema_hall': 1}
+
+        request = self.factory.post('create-movie/')
+        form = MovieShowCreateForm(data=form_data, request=request)
+        self.assertFalse(form.is_valid())
+
+    @patch('cinema.forms.messages.warning', return_value=None)
+    def test_invalid_midnight_movie_show_create_v3(self, warning):
+        form_data = {'movie_name': 'TestMovie',
+                     'ticket_price': 77,
+                     'start_time': '23:00',
+                     'finish_time': '21:00',
+                     'start_date': '2022-01-22',
+                     'finish_date': '2022-01-26',
                      'cinema_hall': 1}
 
         request = self.factory.post('create-movie/')

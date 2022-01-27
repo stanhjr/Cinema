@@ -68,12 +68,12 @@ class MovieShowCreateForm(ModelForm):
 
         enter_start_date = Q(start_date__range=(start_date, finish_date))
         enter_finish_date = Q(finish_date__range=(start_date, finish_date))
-
+        middle_date_start = Q(start_date__lte=start_date, finish_date__gte=finish_date)
         enter_start_time = Q(start_time__range=(start_time, finish_time))
         enter_finish_time = Q(finish_time__range=(start_time, finish_time))
 
         movie_obj = MovieShow.objects.filter(cinema_hall=cinema_hall_obj.pk).filter(
-            enter_start_date | enter_finish_date).filter(enter_start_time | enter_finish_time).all()
+            enter_start_date | enter_finish_date | middle_date_start).filter(enter_start_time | enter_finish_time).all()
 
         if start_time > finish_time:
             enter_start_time_until_midnight = Q(start_time__range=(start_time, '23:59:59'))
@@ -82,7 +82,7 @@ class MovieShowCreateForm(ModelForm):
             enter_finish_time_after_midnight = Q(finish_time__range=('00:00:00', finish_time))
 
             movie_obj = MovieShow.objects.filter(cinema_hall=cinema_hall_obj.pk).filter(
-                enter_start_date | enter_finish_date).\
+                enter_start_date | enter_finish_date | middle_date_start).\
                 filter(enter_start_time_until_midnight | enter_start_time_after_midnight |
                        enter_finish_time_until_midnight | enter_finish_time_after_midnight).all()
 

@@ -95,7 +95,7 @@ class MovieShowSerializerPostTestCase(APITestCase):
                       'ticket_price': 188,
                       'start_time': '23:00',
                       'finish_time': '10:00',
-                      'start_date': '2022-01-23',
+                      'start_date': '2022-01-22',
                       'finish_date': '2022-01-26',
                       'cinema_hall': 1}
 
@@ -157,7 +157,7 @@ class PurchaseSerializerCreateTest(APITestCase):
 
     @freeze_time('2022-01-22 07:30')
     def test_create_purchase_valid_date_time_now(self):
-        data = {'date': '2022-01-20', 'movie_show': 1, 'number_of_ticket': 2}
+        data = {'date': '2022-01-22', 'movie_show': 1, 'number_of_ticket': 2}
         serializer = PurchaseSerializerCreate(data=data, user_id=1)
         self.assertTrue(serializer.is_valid())
 

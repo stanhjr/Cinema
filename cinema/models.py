@@ -18,7 +18,7 @@ class CinemaHall(models.Model):
 
     def get_tickets(self):
         movie_shows_id = MovieShow.objects.filter(cinema_hall=self).values_list('id', flat=True)
-        return PurchasedTicket.objects.filter(movie_show__in=movie_shows_id, date__gte=date.today()).first()
+        return PurchasedTicket.objects.filter(movie_show__in=movie_shows_id).first()
 
 
 class MovieShow(models.Model):
@@ -31,7 +31,7 @@ class MovieShow(models.Model):
     cinema_hall = models.ForeignKey(CinemaHall, on_delete=models.CASCADE, related_name='movie_show')
 
     def get_purchased(self):
-        return self.purchased_tickets.filter(date__gte=date.today()).first()
+        return self.purchased_tickets.filter().first()
 
     def get_tickets_count(self, date_today=date.today()):
         if self.purchased_tickets.filter(date=date_today).aggregate(Sum('number_of_ticket')).get('number_of_ticket__sum'):

@@ -1,9 +1,8 @@
-
 from datetime import date, datetime
 from django.contrib.auth.hashers import make_password
 from django.db.models import Q
 from rest_framework import serializers
-from cinema.models import MyUser, CinemaHall, PurchasedTicket, MovieShow, TokenExpired
+from cinema.models import MyUser, CinemaHall, PurchasedTicket, MovieShow
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -103,11 +102,18 @@ class MovieShowSerializerPost(serializers.ModelSerializer):
         cinema_hall_obj = CinemaHall.objects.get(id=data.get('cinema_hall').id)
         enter_start_date = Q(start_date__range=(start_date, finish_date))
         enter_finish_date = Q(finish_date__range=(start_date, finish_date))
+
+        middle_date_start = Q(start_date__lte=start_date, finish_date__gte=finish_date)
+
         enter_start_time = Q(start_time__range=(start_time, finish_time))
         enter_finish_time = Q(finish_time__range=(start_time, finish_time))
 
         movie_obj = MovieShow.objects.filter(cinema_hall=cinema_hall_obj.pk).filter(
-            enter_start_date | enter_finish_date).filter(enter_start_time | enter_finish_time)
+            enter_start_date | enter_finish_date | middle_date_start).filter(enter_start_time | enter_finish_time)
+
+        if movie_obj:
+            raise serializers.ValidationError(
+                {'start_date, finish_date': 'Сеансы в одном зале не могут накладываться друг на друга'})
 
         if start_time > finish_time:
             enter_start_time_until_midnight = Q(start_time__range=(start_time, '23:59:59'))
@@ -116,7 +122,7 @@ class MovieShowSerializerPost(serializers.ModelSerializer):
             enter_finish_time_after_midnight = Q(finish_time__range=('00:00:00', finish_time))
 
             movie_obj = MovieShow.objects.filter(cinema_hall=cinema_hall_obj.pk).filter(
-                enter_start_date | enter_finish_date).\
+                enter_start_date | enter_finish_date | middle_date_start).\
                 filter(enter_start_time_until_midnight | enter_start_time_after_midnight |
                        enter_finish_time_until_midnight | enter_finish_time_after_midnight).all()
 
@@ -131,10 +137,9 @@ class MovieShowSerializerPost(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     {'start_date, finish_date': 'Сеансы в одном зале не могут накладываться друг на друга'})
 
-        else:
-            if movie_obj:
-                raise serializers.ValidationError(
-                    {'start_date, finish_date': 'Сеансы в одном зале не могут накладываться друг на друга'})
+        if movie_obj:
+            raise serializers.ValidationError(
+                {'start_date, finish_date': 'Сеансы в одном зале не могут накладываться друг на друга'})
         return data
 
 
@@ -177,8 +182,3 @@ class PurchaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = PurchasedTicket
         fields = ['date', 'movie_show', 'number_of_ticket']
-
-
-
-
-
