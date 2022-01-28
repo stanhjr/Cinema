@@ -1,4 +1,5 @@
 import json
+import os
 from django.contrib.auth.models import AnonymousUser
 from rest_framework import status
 from rest_framework.test import APIRequestFactory, force_authenticate, APITestCase
@@ -62,7 +63,8 @@ class MovieShowViewSetTestCase(APITestCase):
         force_authenticate(request, user=AnonymousUser())
         response = MovieShowViewSet.as_view({'get': 'list'})(request)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        with open(r'D:\0_cinema\Cinema\cinema\tests\data\test_movie_list_answer.json') as json_file:
+
+        with open(os.path.join('cinema', 'tests', 'data', 'test_movie_list_answer.json')) as json_file:
             data = json.load(json_file)
         response.render()
         self.assertEqual(json.loads(response.content), data)
