@@ -102,11 +102,9 @@ class MovieShowUpdateView(PermissionRequiredMixin, UpdateView):
             return super().form_invalid(form=form)
 
         enter_start_date = Q(start_date__range=(obj.start_date, obj.finish_date))
-        print(enter_start_date)
         middle_date_start = Q(start_date__lte=obj.start_date, finish_date__gte=obj.finish_date)
         enter_finish_date = Q(finish_date__range=(obj.start_date, obj.finish_date))
         enter_start_time = Q(start_time__range=(obj.start_time, obj.finish_time))
-        print(enter_start_time)
         enter_finish_time = Q(finish_time__range=(obj.start_time, obj.finish_time))
 
         movie_obj = MovieShow.objects.filter(cinema_hall=obj.cinema_hall).exclude(id=obj.id).filter(
@@ -128,7 +126,6 @@ class MovieShowUpdateView(PermissionRequiredMixin, UpdateView):
 
         if movie_obj:
             messages.warning(self.request, 'Сеансы в одном зале не могут накладываться друг на друга')
-            print('DAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
             return super().form_invalid(form=form)
 
         obj.save()

@@ -11,7 +11,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.response import Response
 from cinema.api.serializers import RegisterSerializer, CinemaHallSerializer, PurchaseSerializer, MovieShowSerializer, \
-    PurchaseSerializerCreate, MovieShowSerializerPost
+    PurchaseSerializerCreate, MovieShowSerializerPost, MovieShowSerializerUpdate
 from cinema.models import MyUser, TokenExpired, CinemaHall, MovieShow, PurchasedTicket
 
 
@@ -119,7 +119,7 @@ class MovieShowUpdate(APIView):
 
     def put(self, request, pk):
         movie_show = MovieShow.objects.get(id=pk)
-        serializer = MovieShowSerializerPost(movie_show, data=request.data)
+        serializer = MovieShowSerializerUpdate(movie_show, data=request.data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
@@ -132,14 +132,10 @@ class MovieShowViewSet(ModelViewSet):
     serializer_class = MovieShowSerializer
     permission_classes = [AllowAny]
 
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            self.permission_classes = [AllowAny]
-        return super().get_permissions()
-
     def get_queryset(self):
         start_time = self.request.query_params.get('start_time') or '00:00:00'
         finish_time = self.request.query_params.get('finish_time') or '23:59:59'
+
         hall_id = self.request.query_params.get('hall_id')
         show_day = self.request.query_params.get('show_day')
         enter_time_range = Q(start_time__range=(start_time, finish_time))

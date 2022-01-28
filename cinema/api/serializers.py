@@ -71,9 +71,6 @@ class MovieShowSerializerPost(serializers.ModelSerializer):
     def create(self, validated_data):
         return MovieShow.objects.create(**validated_data)
 
-    def update(self, instance, validated_data):
-        return instance
-
     def validate(self, data):
         start_time = data.get('start_time')
         finish_time = data.get('finish_time')
@@ -106,17 +103,6 @@ class MovieShowSerializerPost(serializers.ModelSerializer):
         enter_start_time = Q(start_time__range=(start_time, finish_time))
         enter_finish_time = Q(finish_time__range=(start_time, finish_time))
 
-        if self.instance:
-            movie_show_obj = MovieShow.objects.get(id=self.instance.id)
-            if movie_show_obj.get_purchased():
-                raise serializers.ValidationError(
-                    {'movie_show': 'На этот сеанс уже куплены билеты, изменить нелья'})
-
-            elif MovieShow.objects.filter(cinema_hall=self.instance.cinema_hall).exclude(id=self.instance.id).filter(
-                    enter_start_date | enter_finish_date).filter(enter_start_time | enter_finish_time):
-                raise serializers.ValidationError(
-                    {'start_date, finish_date': 'Сеансы в одном зале не могут накладываться друг на друга'})
-
         movie_obj = MovieShow.objects.filter(cinema_hall=cinema_hall_obj.pk).filter(
             enter_start_date | enter_finish_date | middle_date_start).filter(enter_start_time | enter_finish_time)
 
@@ -131,6 +117,88 @@ class MovieShowSerializerPost(serializers.ModelSerializer):
             enter_finish_time_after_midnight = Q(finish_time__range=('00:00:00', finish_time))
 
             movie_obj = MovieShow.objects.filter(cinema_hall=cinema_hall_obj.pk).filter(
+                enter_start_date | enter_finish_date | middle_date_start).\
+                filter(enter_start_time_until_midnight | enter_start_time_after_midnight |
+                       enter_finish_time_until_midnight | enter_finish_time_after_midnight).all()
+
+        if movie_obj:
+            raise serializers.ValidationError(
+                {'start_date, finish_date': 'Сеансы в одном зале не могут накладываться друг на друга'})
+        return data
+
+
+class MovieShowSerializerUpdate(serializers.ModelSerializer):
+
+    class Meta:
+        model = MovieShow
+        fields = '__all__'
+
+    def update(self, instance, validated_data):
+        instance.movie_name = validated_data.get('movie_name', instance.movie_name)
+        instance.cinema_hall = validated_data.get('cinema_hall', instance.cinema_hall)
+        instance.start_time = validated_data.get('start_time', instance.start_time)
+        instance.finish_time = validated_data.get('finish_time', instance.finish_time)
+        instance.start_date = validated_data.get('start_date', instance.start_date)
+        instance.finish_date = validated_data.get('finish_date', instance.finish_date)
+        instance.ticket_price = validated_data.get('ticket_price', instance.ticket_price)
+        instance.save()
+        return instance
+
+    def validate(self, data):
+        cinema_hall_obj = data.get('cinema_hall') or self.instance.cinema_hall
+        start_time = data.get('start_time') or self.instance.start_time
+        finish_time = data.get('finish_time') or self.instance.finish_time
+        start_date = data.get('start_date') or self.instance.start_date
+        finish_date = data.get('finish_date') or self.instance.finish_date
+
+        if start_date > finish_date:
+            raise serializers.ValidationError(
+                {'start_date, finish_date': 'Дата конца сеанса не может быть раньше чем дата начала сеанса'})
+        if start_date == finish_date and start_time >= finish_time:
+            raise serializers.ValidationError(
+                {'start_date, finish_date': 'Фильм всё таки должен идти какое то количество времени'})
+
+        if start_date < date.today():
+            raise serializers.ValidationError(
+                {'start_date, finish_date': 'Нельзя создавать сеанcы от вчера!'})
+
+        if start_date < date.today() or finish_date < date.today():
+            raise serializers.ValidationError(
+                {'start_date, finish_date': 'Нельзя создавать сеанcы от вчера!'})
+
+        if start_date == date.today() and start_time < datetime.now().time():
+            raise serializers.ValidationError(
+                {'start_date, finish_date': 'Нельзя создавать сеанcы от вчера!'})
+
+        enter_start_date = Q(start_date__range=(start_date, finish_date))
+        enter_finish_date = Q(finish_date__range=(start_date, finish_date))
+        middle_date_start = Q(start_date__lte=start_date, finish_date__gte=finish_date)
+        enter_start_time = Q(start_time__range=(start_time, finish_time))
+        enter_finish_time = Q(finish_time__range=(start_time, finish_time))
+
+        if MovieShow.objects.get(id=self.instance.id).get_purchased():
+            raise serializers.ValidationError(
+                {'movie_show': 'На этот сеанс уже куплены билеты, изменить нелья'})
+
+        elif MovieShow.objects.filter(cinema_hall=self.instance.cinema_hall).exclude(id=self.instance.id).filter(
+                enter_start_date | enter_finish_date).filter(enter_start_time | enter_finish_time):
+            raise serializers.ValidationError(
+                {'start_date, finish_date': 'Сеансы в одном зале не могут накладываться друг на друга'})
+
+        movie_obj = MovieShow.objects.filter(cinema_hall=cinema_hall_obj.pk).exclude(id=self.instance.id).filter(
+            enter_start_date | enter_finish_date | middle_date_start).filter(enter_start_time | enter_finish_time)
+
+        if movie_obj:
+            raise serializers.ValidationError(
+                {'start_date, finish_date': 'Сеансы в одном зале не могут накладываться друг на друга'})
+
+        if start_time > finish_time:
+            enter_start_time_until_midnight = Q(start_time__range=(start_time, '23:59:59'))
+            enter_start_time_after_midnight = Q(start_time__range=('00:00:00', finish_time))
+            enter_finish_time_until_midnight = Q(finish_time__range=(start_time, '23:59:59'))
+            enter_finish_time_after_midnight = Q(finish_time__range=('00:00:00', finish_time))
+
+            movie_obj = MovieShow.objects.filter(cinema_hall=cinema_hall_obj.pk).exclude(id=self.instance.id).filter(
                 enter_start_date | enter_finish_date | middle_date_start).\
                 filter(enter_start_time_until_midnight | enter_start_time_after_midnight |
                        enter_finish_time_until_midnight | enter_finish_time_after_midnight).all()
