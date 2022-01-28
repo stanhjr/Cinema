@@ -102,11 +102,20 @@ class MovieShowSerializerPost(serializers.ModelSerializer):
         cinema_hall_obj = CinemaHall.objects.get(id=data.get('cinema_hall').id)
         enter_start_date = Q(start_date__range=(start_date, finish_date))
         enter_finish_date = Q(finish_date__range=(start_date, finish_date))
-
         middle_date_start = Q(start_date__lte=start_date, finish_date__gte=finish_date)
-
         enter_start_time = Q(start_time__range=(start_time, finish_time))
         enter_finish_time = Q(finish_time__range=(start_time, finish_time))
+
+        if self.instance:
+            movie_show_obj = MovieShow.objects.get(id=self.instance.id)
+            if movie_show_obj.get_purchased():
+                raise serializers.ValidationError(
+                    {'movie_show': 'На этот сеанс уже куплены билеты, изменить нелья'})
+
+            elif MovieShow.objects.filter(cinema_hall=self.instance.cinema_hall).exclude(id=self.instance.id).filter(
+                    enter_start_date | enter_finish_date).filter(enter_start_time | enter_finish_time):
+                raise serializers.ValidationError(
+                    {'start_date, finish_date': 'Сеансы в одном зале не могут накладываться друг на друга'})
 
         movie_obj = MovieShow.objects.filter(cinema_hall=cinema_hall_obj.pk).filter(
             enter_start_date | enter_finish_date | middle_date_start).filter(enter_start_time | enter_finish_time)
@@ -125,17 +134,6 @@ class MovieShowSerializerPost(serializers.ModelSerializer):
                 enter_start_date | enter_finish_date | middle_date_start).\
                 filter(enter_start_time_until_midnight | enter_start_time_after_midnight |
                        enter_finish_time_until_midnight | enter_finish_time_after_midnight).all()
-
-        if self.instance:
-            movie_show_obj = MovieShow.objects.get(id=self.instance.id)
-            if movie_show_obj.get_purchased():
-                raise serializers.ValidationError(
-                    {'movie_show': 'На этот сеанс уже куплены билеты, изменить нелья'})
-
-            elif MovieShow.objects.filter(cinema_hall=self.instance.cinema_hall).exclude(id=self.instance.id).filter(
-                    enter_start_date | enter_finish_date).filter(enter_start_time | enter_finish_time):
-                raise serializers.ValidationError(
-                    {'start_date, finish_date': 'Сеансы в одном зале не могут накладываться друг на друга'})
 
         if movie_obj:
             raise serializers.ValidationError(

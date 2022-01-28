@@ -212,21 +212,6 @@ class MovieShowUpdateViewTest(TestCase):
         response = MovieShowUpdateView.as_view()(request, pk=1)
         self.assertEqual(MovieShow.objects.get(id=1).movie_name, 'Batman')
 
-    @freeze_time('2022-01-22')
-    def test_update_movie_superuser_valid_v2(self):
-        cinema_hall_obj = CinemaHall.objects.get(id=1)
-        request = self.factory.post('update_movie_show/',
-                                    {'movie_name': 'Superman555',
-                                     'ticket_price': 100,
-                                     'start_time': '23:00',
-                                     'finish_time': '01:30',
-                                     'start_date': '2022-03-23',
-                                     'finish_date': '2022-03-25',
-                                     'cinema_hall': cinema_hall_obj})
-        request.user = self.superuser
-        response = MovieShowUpdateView.as_view()(request, pk=1)
-        self.assertEqual(MovieShow.objects.get(id=1).movie_name, 'Superman555')
-
 
 class PurchasedListViewTest(TestCase):
     fixtures = ['initial_data.json', ]
