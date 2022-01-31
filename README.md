@@ -1,8 +1,7 @@
 # Cinema
-this is my pet project, cinema site
+this is my pet project
 
 Сайт кинотеатра.
-
 
 Действия:
 
