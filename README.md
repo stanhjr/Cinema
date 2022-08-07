@@ -1,41 +1,40 @@
 # Cinema
-this is my pet project
 
-Сайт кинотеатра.
+Cinema site.
 
-Действия:
-
-
-Админ:
-
-Может создавать зал кинотеатра, в котором он должен указать имя зала, размер зала
+Actions:
 
 
-Может создавать сеансы, у которых указывается время начала, время окончания, и даты показа (с 5 февраля по 15 февраля 2021 года, например), цену билета на сеанс.
+Admin:
+
+Can create a cinema hall, in which he must specify the name of the hall, the size of the hall
 
 
-Может изменять зал или сеанс, если не было куплено ни одного билета в этот зал или в на этот сеанс.
+Can create sessions that specify the start time, end time, and show dates (from February 5 to February 15, 2021, for example), the ticket price for the session.
 
 
-Сеансы в одном зале не могут накладываться друг на друга.
+Can change the hall or session if no tickets have been purchased for this hall or for this session.
 
 
-Пользователь:
+Sessions in the same room cannot overlap.
 
 
-Может просмотреть список сеансов на сегодня и в отдельной вкладке на завтра, кол-во свободных мест в зале, купить билет\билеты на сеанс, если в зале закончились места, должен получить соответствующее уведомление.
+User:
 
 
-Может просмотреть список совершенных им покупок, и общую затраченную сумму за всё время.
+He can view the list of sessions for today and in a separate tab for tomorrow, the number of free seats in the hall, buy a ticket \ tickets for the session, if the hall runs out of seats, he should receive a notification.
 
 
-Сеансы можно сортировать по цене или времени начала.
+Can view a list of purchases made by him, and the total amount spent for all time.
 
 
-Не залогиненный пользователь, видит список, может его отсортировать, не может ничего купить
+Sessions can be sorted by price or start time.
 
 
-По ресту, добавить возможность получения информации о всех сеансах на сегодня, которые начинаются в определённый промежуток времени и\или идут в конкретном зале.
+Unlogged user, sees the list, can sort it, can't buy anything
 
 
-В любой части проекта отобажать кол-во активных сеансов в реальном времени
+By rest, add the ability to obtain information about all sessions for today, which start at a certain time interval and / or go in a specific room.
+
+
+In any part of the project, display the number of active sessions in real time
